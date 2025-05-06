@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
 
 interface Comment {
   id: string;
@@ -20,50 +19,6 @@ interface FashionItem {
   comments: Comment[];
 }
 
-async function scrapeMusinsaItems(): Promise<FashionItem[]> {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-
-  try {
-    const page = await browser.newPage();
-    
-    // 코트 카테고리 URL
-    const coatUrl = 'https://www.musinsa.com/categories/item/005';
-    await page.goto(coatUrl, { waitUntil: 'networkidle0' });
-
-    // 상품 정보 수집
-    const items = await page.evaluate(() => {
-      const productElements = document.querySelectorAll('.li_box');
-      return Array.from(productElements).map((element, index) => {
-        const imgElement = element.querySelector('img');
-        const titleElement = element.querySelector('.list_info a');
-        const priceElement = element.querySelector('.price');
-        
-        return {
-          id: `coat-${index + 1}`,
-          title: titleElement?.textContent?.trim() || `Coat Item ${index + 1}`,
-          imageUrl: imgElement?.getAttribute('src') || '',
-          likes: Math.floor(Math.random() * 1000),
-          isLiked: false,
-          description: 'Trendy coat for this season',
-          timestamp: new Date().toISOString(),
-          price: priceElement?.textContent?.trim() || '가격 정보 없음',
-          comments: []
-        };
-      }).slice(0, 20); // 상위 20개 아이템만 가져오기
-    });
-
-    return items;
-  } catch (error) {
-    console.error('Error scraping Musinsa:', error);
-    return [];
-  } finally {
-    await browser.close();
-  }
-}
-
 function generateMockItems(): FashionItem[] {
   const items = [];
   const fashionImages = [
@@ -80,11 +35,25 @@ function generateMockItems(): FashionItem[] {
     { id: '3', userId: 'user3', content: '색상이 마음에 들어요', timestamp: new Date().toISOString() },
   ];
 
+  const coatTitles = [
+    '클래식 더블 코트',
+    '오버사이즈 트렌치 코트',
+    '울 블렌디드 롱 코트',
+    '캐시미어 블렌드 코트',
+    '베이직 싱글 코트',
+    '체크 패턴 코트',
+    '라이트 웨이트 코트',
+    '크롭 코트',
+    '후드 코트',
+    '패딩 코트'
+  ];
+
   for (let i = 1; i <= 20; i++) {
     const imageIndex = (i - 1) % fashionImages.length;
+    const titleIndex = (i - 1) % coatTitles.length;
     items.push({
       id: `item-${i}`,
-      title: `Trendy Coat ${i}`,
+      title: coatTitles[titleIndex],
       imageUrl: fashionImages[imageIndex],
       likes: Math.floor(Math.random() * 1000),
       isLiked: false,
@@ -99,13 +68,7 @@ function generateMockItems(): FashionItem[] {
 
 export async function GET() {
   try {
-    const items = await scrapeMusinsaItems();
-    
-    if (items.length === 0) {
-      // 스크래핑 실패 시 임시 데이터 반환
-      return NextResponse.json(generateMockItems());
-    }
-    
+    const items = generateMockItems();
     return NextResponse.json(items);
   } catch (error) {
     console.error('Error in fashion API:', error);
