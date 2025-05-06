@@ -1,56 +1,32 @@
 import { NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
 
+// 임시 데이터 생성 함수
+function generateMockItems() {
+  const items = [];
+  for (let i = 1; i <= 100; i++) {
+    items.push({
+      id: `item-${i}`,
+      title: `Fashion Item ${i}`,
+      imageUrl: `https://picsum.photos/seed/${i}/800/800`, // 랜덤 이미지
+      likes: Math.floor(Math.random() * 1000),
+      isLiked: false,
+      description: `Stylish fashion item ${i} for your collection`,
+      timestamp: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
+    });
+  }
+  return items;
+}
+
 export async function GET() {
   try {
-    const response = await fetch('https://www.musinsa.com/brands/musinsastandard', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    
-    const items = $('.li_box').map((_, element) => {
-      const $element = $(element);
-      const title = $element.find('.item_title').text().trim();
-      const imageUrl = $element.find('.list_img img').attr('data-original') || 
-                      $element.find('.list_img img').attr('src') || '';
-      const id = $element.attr('data-goods-no') || Math.random().toString();
-
-      // Skip items without proper data
-      if (!title || !imageUrl) {
-        return null;
-      }
-
-      return {
-        id,
-        title,
-        imageUrl: imageUrl.startsWith('//') ? `https:${imageUrl}` : imageUrl,
-        votes: Math.floor(Math.random() * 100), // Placeholder for votes
-      };
-    }).get().filter(Boolean); // Remove null items
-
-    if (items.length === 0) {
-      console.error('No items found in the response');
-      return NextResponse.json({ error: 'No items found' }, { status: 404 });
-    }
-
+    const items = generateMockItems();
     return NextResponse.json(items);
   } catch (error) {
-    console.error('Error fetching fashion items:', error);
+    console.error('Error generating fashion items:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Failed to fetch fashion items', details: errorMessage },
+      { error: 'Failed to generate fashion items', details: errorMessage },
       { status: 500 }
     );
   }
