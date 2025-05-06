@@ -12,6 +12,7 @@ interface FashionItemProps {
     isLiked: boolean;
     description: string;
     timestamp: string;
+    price: string;
   };
   onLike: (id: string) => void;
 }
@@ -19,6 +20,7 @@ interface FashionItemProps {
 export default function FashionItem({ item, onLike }: FashionItemProps) {
   const [isLiked, setIsLiked] = useState(item.isLiked);
   const [likes, setLikes] = useState(item.likes);
+  const [imageError, setImageError] = useState(false);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -51,12 +53,21 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
 
       {/* Image */}
       <div className="relative aspect-square">
-        <Image
-          src={item.imageUrl}
-          alt={item.title}
-          fill
-          className="object-cover"
-        />
+        {!imageError ? (
+          <Image
+            src={item.imageUrl}
+            alt={item.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+            onError={() => setImageError(true)}
+            priority={true}
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-500">이미지를 불러올 수 없습니다</span>
+          </div>
+        )}
       </div>
 
       {/* Actions */}
@@ -82,10 +93,11 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
           </button>
           <span className="font-semibold">{likes.toLocaleString()} likes</span>
         </div>
-        <p className="text-sm">
+        <p className="text-sm mb-2">
           <span className="font-semibold mr-2">{item.title}</span>
           {item.description}
         </p>
+        <p className="text-sm font-semibold text-gray-800">{item.price}</p>
       </div>
     </div>
   );
