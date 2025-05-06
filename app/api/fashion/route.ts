@@ -15,11 +15,16 @@ interface FashionItem {
   isLiked: boolean;
   description: string;
   timestamp: string;
-  price: string;
+  price?: string;
   comments: Comment[];
+  userId: string;
+  userName: string;
 }
 
-function generateMockItems(): FashionItem[] {
+// 임시 저장소 (실제로는 데이터베이스를 사용해야 합니다)
+let fashionItems: FashionItem[] = [];
+
+function generateInitialItems(): FashionItem[] {
   const items = [];
   const fashionImages = [
     'https://images.unsplash.com/photo-1483985988355-763728e1935b',
@@ -48,7 +53,7 @@ function generateMockItems(): FashionItem[] {
     '패딩 코트'
   ];
 
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 5; i++) {
     const imageIndex = (i - 1) % fashionImages.length;
     const titleIndex = (i - 1) % coatTitles.length;
     items.push({
@@ -60,20 +65,69 @@ function generateMockItems(): FashionItem[] {
       description: 'Stylish coat for your winter collection',
       timestamp: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
       price: `${Math.floor(Math.random() * 200000) + 100000}원`,
-      comments: [...sampleComments]
+      comments: [...sampleComments],
+      userId: `user${i}`,
+      userName: `User ${i}`
     });
   }
   return items;
 }
 
+// 초기 데이터 생성
+fashionItems = generateInitialItems();
+
 export async function GET() {
   try {
-    const items = generateMockItems();
-    return NextResponse.json(items);
+    return NextResponse.json(fashionItems);
   } catch (error) {
     console.error('Error in fashion API:', error);
     return NextResponse.json(
       { error: 'Failed to fetch fashion items' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const formData = await request.formData();
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const imageFile = formData.get('image') as File;
+    const userId = formData.get('userId') as string;
+    const userName = formData.get('userName') as string;
+
+    if (!title || !description || !imageFile || !userId || !userName) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // 이미지를 Base64로 변환
+    const imageBuffer = await imageFile.arrayBuffer();
+    const base64Image = Buffer.from(imageBuffer).toString('base64');
+    const imageUrl = `data:${imageFile.type};base64,${base64Image}`;
+
+    const newItem: FashionItem = {
+      id: `item-${Date.now()}`,
+      title,
+      imageUrl,
+      likes: 0,
+      isLiked: false,
+      description,
+      timestamp: new Date().toISOString(),
+      comments: [],
+      userId,
+      userName
+    };
+
+    fashionItems.unshift(newItem);
+    return NextResponse.json(newItem);
+  } catch (error) {
+    console.error('Error in fashion API:', error);
+    return NextResponse.json(
+      { error: 'Failed to create fashion item' },
       { status: 500 }
     );
   }

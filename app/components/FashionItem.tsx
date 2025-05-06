@@ -19,8 +19,15 @@ interface FashionItemProps {
     isLiked: boolean;
     description: string;
     timestamp: string;
-    price: string;
-    comments: Comment[];
+    price?: string;
+    comments: Array<{
+      id: string;
+      userId: string;
+      content: string;
+      timestamp: string;
+    }>;
+    userId: string;
+    userName: string;
   };
   onLike: (id: string) => void;
 }
@@ -67,9 +74,11 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
     <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
       {/* Header */}
       <div className="p-4 flex items-center">
-        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3"></div>
+        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 flex items-center justify-center text-gray-500">
+          {item.userName.charAt(0)}
+        </div>
         <div>
-          <h3 className="font-semibold">{item.title}</h3>
+          <h3 className="font-semibold">{item.userName}</h3>
           <p className="text-xs text-gray-500">
             {formatDate(item.timestamp)}
           </p>
