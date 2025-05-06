@@ -55,31 +55,31 @@ export default function UploadForm({ onUpload }: UploadFormProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h2 className="text-2xl font-bold mb-4">내 착장 공유하기</h2>
+      <h2 className="text-2xl font-bold mb-4">Share your OOTD</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            제목
+            Title
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="제목을 입력하세요"
+            placeholder="Enter your title"
             required
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            설명
+            Description
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="착장에 대한 설명을 입력하세요"
+            placeholder="Enter your description"
             rows={3}
             required
           />
@@ -87,7 +87,7 @@ export default function UploadForm({ onUpload }: UploadFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            사진
+            Image
           </label>
           <input
             type="file"
@@ -117,7 +117,7 @@ export default function UploadForm({ onUpload }: UploadFormProps) {
               : 'bg-blue-500 hover:bg-blue-600'
           }`}
         >
-          {isUploading ? '업로드 중...' : '업로드하기'}
+          {isUploading ? 'Uploading' : 'Upload'}
         </button>
       </form>
     </div>
