@@ -10,7 +10,7 @@ interface Comment {
 interface FashionItem {
   id: string;
   title: string;
-  imageUrl: string;
+  imageUrls: string[];
   likes: number;
   isLiked: boolean;
   description: string;
@@ -35,22 +35,22 @@ function generateInitialItems(): FashionItem[] {
   ];
 
   const sampleComments: Comment[] = [
-    { id: '1', userId: 'user1', content: '정말 예쁜 코트네요!', timestamp: new Date().toISOString() },
-    { id: '2', userId: 'user2', content: '가격이 좀 비싸네요', timestamp: new Date().toISOString() },
-    { id: '3', userId: 'user3', content: '색상이 마음에 들어요', timestamp: new Date().toISOString() },
+    { id: '1', userId: 'user1', content: 'What a beautiful coat!', timestamp: new Date().toISOString() },
+    { id: '2', userId: 'user2', content: 'The price is a bit high', timestamp: new Date().toISOString() },
+    { id: '3', userId: 'user3', content: 'I love the color', timestamp: new Date().toISOString() },
   ];
 
   const coatTitles = [
-    '클래식 더블 코트',
-    '오버사이즈 트렌치 코트',
-    '울 블렌디드 롱 코트',
-    '캐시미어 블렌드 코트',
-    '베이직 싱글 코트',
-    '체크 패턴 코트',
-    '라이트 웨이트 코트',
-    '크롭 코트',
-    '후드 코트',
-    '패딩 코트'
+    'Classic Double Coat',
+    'Oversized Trench Coat',
+    'Wool Blend Long Coat',
+    'Cashmere Blend Coat',
+    'Basic Single Coat',
+    'Check Pattern Coat',
+    'Light Weight Coat',
+    'Crop Coat',
+    'Hooded Coat',
+    'Padded Coat'
   ];
 
   for (let i = 1; i <= 5; i++) {
@@ -59,7 +59,7 @@ function generateInitialItems(): FashionItem[] {
     items.push({
       id: `item-${i}`,
       title: coatTitles[titleIndex],
-      imageUrl: fashionImages[imageIndex],
+      imageUrls: [fashionImages[imageIndex], fashionImages[(imageIndex + 1) % fashionImages.length]],
       likes: Math.floor(Math.random() * 1000),
       isLiked: false,
       description: 'Stylish coat for your winter collection',
@@ -93,26 +93,31 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const imageFile = formData.get('image') as File;
     const userId = formData.get('userId') as string;
     const userName = formData.get('userName') as string;
+    const imageCount = parseInt(formData.get('imageCount') as string);
 
-    if (!title || !description || !imageFile || !userId || !userName) {
+    if (!title || !description || !userId || !userName || !imageCount) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // 이미지를 Base64로 변환
-    const imageBuffer = await imageFile.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
-    const imageUrl = `data:${imageFile.type};base64,${base64Image}`;
+    const imageUrls: string[] = [];
+    for (let i = 0; i < imageCount; i++) {
+      const imageFile = formData.get(`image${i}`) as File;
+      if (imageFile) {
+        const imageBuffer = await imageFile.arrayBuffer();
+        const base64Image = Buffer.from(imageBuffer).toString('base64');
+        imageUrls.push(`data:${imageFile.type};base64,${base64Image}`);
+      }
+    }
 
     const newItem: FashionItem = {
       id: `item-${Date.now()}`,
       title,
-      imageUrl,
+      imageUrls,
       likes: 0,
       isLiked: false,
       description,

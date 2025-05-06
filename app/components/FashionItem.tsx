@@ -1,7 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
+import Image from 'next/image';
+import { Heart, MessageCircle, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Comment {
   id: string;
@@ -14,7 +15,7 @@ interface FashionItemProps {
   item: {
     id: string;
     title: string;
-    imageUrl: string;
+    imageUrls: string[];
     likes: number;
     isLiked: boolean;
     description: string;
@@ -28,137 +29,141 @@ interface FashionItemProps {
 }
 
 export default function FashionItem({ item, onLike }: FashionItemProps) {
-  const [isLiked, setIsLiked] = useState(item.isLiked);
-  const [likes, setLikes] = useState(item.likes);
-  const [imageError, setImageError] = useState(false);
-  const [comments, setComments] = useState<Comment[]>(item.comments);
+  const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes(prev => isLiked ? prev - 1 : prev + 1);
-    onLike(item.id);
-  };
-
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim()) return;
-
-    const comment: Comment = {
-      id: `comment-${Date.now()}`,
-      userId: 'current-user',
-      content: newComment,
-      timestamp: new Date().toISOString()
-    };
-
-    setComments(prev => [...prev, comment]);
-    setNewComment('');
+    if (newComment.trim()) {
+      // Here you would typically make an API call to save the comment
+      console.log('New comment:', newComment);
+      setNewComment('');
+    }
   };
 
-  // Format timestamp to a simple date string
-  const formatDate = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('ko-KR', {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      month: 'short',
+      day: 'numeric',
     });
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-      {/* Header */}
-      <div className="p-4 flex items-center">
-        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3 flex items-center justify-center text-gray-500">
-          {item.userName.charAt(0)}
-        </div>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Post Header */}
+      <div className="p-4 flex items-center space-x-3">
+        <div className="w-8 h-8 rounded-full bg-gray-200"></div>
         <div>
-          <h3 className="font-semibold">{item.userName}</h3>
-          <p className="text-xs text-gray-500">
-            {formatDate(item.timestamp)}
-          </p>
+          <p className="font-semibold">{item.userName}</p>
+          <p className="text-sm text-gray-500">{formatDate(item.timestamp)}</p>
         </div>
       </div>
 
-      {/* Image */}
+      {/* Image Carousel */}
       <div className="relative aspect-square">
-        {!imageError ? (
-          <Image
-            src={item.imageUrl}
-            alt={item.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover"
-            onError={() => setImageError(true)}
-            priority={true}
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500">이미지를 불러올 수 없습니다</span>
-          </div>
+        <Image
+          src={item.imageUrls[currentImageIndex]}
+          alt={item.title}
+          fill
+          className="object-cover"
+        />
+        {item.imageUrls.length > 1 && (
+          <>
+            <button
+              onClick={() => setCurrentImageIndex(prev => (prev > 0 ? prev - 1 : prev))}
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-1 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-75"
+              disabled={currentImageIndex === 0}
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={() => setCurrentImageIndex(prev => (prev < item.imageUrls.length - 1 ? prev + 1 : prev))}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-75"
+              disabled={currentImageIndex === item.imageUrls.length - 1}
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
+              {item.imageUrls.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full ${
+                    index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
 
       {/* Actions */}
       <div className="p-4">
-        <div className="flex items-center mb-2">
+        <div className="flex items-center space-x-4 mb-4">
           <button
-            onClick={handleLike}
-            className="mr-4 focus:outline-none"
+            onClick={() => onLike(item.id)}
+            className={`flex items-center space-x-1 ${
+              item.isLiked ? 'text-red-500' : 'text-gray-500'
+            }`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className={`h-8 w-8 ${isLiked ? 'text-red-500 fill-current' : 'text-gray-500'}`}
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={isLiked ? 0 : 2}
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
+            <Heart className={`w-6 h-6 ${item.isLiked ? 'fill-current' : ''}`} />
+            <span>{item.likes}</span>
           </button>
-          <span className="font-semibold">{likes.toLocaleString()} likes</span>
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="flex items-center space-x-1 text-gray-500"
+          >
+            <MessageCircle className="w-6 h-6" />
+            <span>{item.comments.length}</span>
+          </button>
+          <button className="text-gray-500">
+            <Share2 className="w-6 h-6" />
+          </button>
         </div>
-        <p className="text-sm mb-2">
-          <span className="font-semibold mr-2">{item.title}</span>
-          {item.description}
-        </p>
-        {item.price && (
-          <p className="text-sm font-semibold text-gray-800 mb-4">{item.price}</p>
-        )}
+
+        {/* Title and Description */}
+        <div className="mb-4">
+          <h3 className="font-semibold mb-1">{item.title}</h3>
+          {item.price && (
+            <p className="text-gray-600 mb-2">Price: {item.price}</p>
+          )}
+          <p className="text-gray-700">{item.description}</p>
+        </div>
 
         {/* Comments Section */}
-        <div className="mt-4">
-          <h4 className="font-semibold mb-2">댓글 {comments.length}개</h4>
-          <div className="space-y-2 mb-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="text-sm">
-                <span className="font-semibold mr-2">{comment.userId}</span>
-                {comment.content}
-              </div>
-            ))}
+        {showComments && (
+          <div className="mt-4">
+            <div className="space-y-3 mb-4">
+              {item.comments.map((comment) => (
+                <div key={comment.id} className="flex items-start space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-gray-200"></div>
+                  <div>
+                    <p className="font-semibold text-sm">{comment.userId}</p>
+                    <p className="text-sm text-gray-700">{comment.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleSubmitComment} className="flex space-x-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="flex-1 border rounded-lg px-3 py-2 text-sm"
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm"
+              >
+                Post
+              </button>
+            </form>
           </div>
-          
-          {/* Comment Form */}
-          <form onSubmit={handleAddComment} className="flex items-center gap-2">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 입력하세요..."
-              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              게시
-            </button>
-          </form>
-        </div>
+        )}
       </div>
     </div>
   );
