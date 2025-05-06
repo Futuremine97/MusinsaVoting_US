@@ -20,12 +20,7 @@ interface FashionItemProps {
     description: string;
     timestamp: string;
     price?: string;
-    comments: Array<{
-      id: string;
-      userId: string;
-      content: string;
-      timestamp: string;
-    }>;
+    comments: Comment[];
     userId: string;
     userName: string;
   };
@@ -131,7 +126,9 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
           <span className="font-semibold mr-2">{item.title}</span>
           {item.description}
         </p>
-        <p className="text-sm font-semibold text-gray-800 mb-4">{item.price}</p>
+        {item.price && (
+          <p className="text-sm font-semibold text-gray-800 mb-4">{item.price}</p>
+        )}
 
         {/* Comments Section */}
         <div className="mt-4">
