@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import FashionItem from './FashionItem';
 import UploadForm from './UploadForm';
 
+interface Comment {
+  id: string;
+  userId: string;
+  content: string;
+  timestamp: string;
+}
+
 interface FashionItem {
   id: string;
   title: string;
@@ -13,12 +20,7 @@ interface FashionItem {
   description: string;
   timestamp: string;
   price?: string;
-  comments: Array<{
-    id: string;
-    userId: string;
-    content: string;
-    timestamp: string;
-  }>;
+  comments: Comment[];
   userId: string;
   userName: string;
 }
