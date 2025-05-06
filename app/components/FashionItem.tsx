@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
 
 interface FashionItemProps {
   item: {
@@ -27,6 +26,16 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
     onLike(item.id);
   };
 
+  // Format timestamp to a simple date string
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
       {/* Header */}
@@ -35,7 +44,7 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
         <div>
           <h3 className="font-semibold">{item.title}</h3>
           <p className="text-xs text-gray-500">
-            {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
+            {formatDate(item.timestamp)}
           </p>
         </div>
       </div>
