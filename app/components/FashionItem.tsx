@@ -3,6 +3,13 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+interface Comment {
+  id: string;
+  userId: string;
+  content: string;
+  timestamp: string;
+}
+
 interface FashionItemProps {
   item: {
     id: string;
@@ -13,6 +20,7 @@ interface FashionItemProps {
     description: string;
     timestamp: string;
     price: string;
+    comments: Comment[];
   };
   onLike: (id: string) => void;
 }
@@ -21,11 +29,28 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
   const [isLiked, setIsLiked] = useState(item.isLiked);
   const [likes, setLikes] = useState(item.likes);
   const [imageError, setImageError] = useState(false);
+  const [comments, setComments] = useState<Comment[]>(item.comments);
+  const [newComment, setNewComment] = useState('');
 
   const handleLike = () => {
     setIsLiked(!isLiked);
     setLikes(prev => isLiked ? prev - 1 : prev + 1);
     onLike(item.id);
+  };
+
+  const handleAddComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    const comment: Comment = {
+      id: `comment-${Date.now()}`,
+      userId: 'current-user',
+      content: newComment,
+      timestamp: new Date().toISOString()
+    };
+
+    setComments(prev => [...prev, comment]);
+    setNewComment('');
   };
 
   // Format timestamp to a simple date string
@@ -97,7 +122,37 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
           <span className="font-semibold mr-2">{item.title}</span>
           {item.description}
         </p>
-        <p className="text-sm font-semibold text-gray-800">{item.price}</p>
+        <p className="text-sm font-semibold text-gray-800 mb-4">{item.price}</p>
+
+        {/* Comments Section */}
+        <div className="mt-4">
+          <h4 className="font-semibold mb-2">댓글 {comments.length}개</h4>
+          <div className="space-y-2 mb-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="text-sm">
+                <span className="font-semibold mr-2">{comment.userId}</span>
+                {comment.content}
+              </div>
+            ))}
+          </div>
+          
+          {/* Comment Form */}
+          <form onSubmit={handleAddComment} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="댓글을 입력하세요..."
+              className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              게시
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
