@@ -34,7 +34,7 @@ function generateInitialItems(): FashionItem[] {
     'https://images.unsplash.com/photo-1529139574466-a303027c1d8b',
   ];
 
-  const sampleComments = [
+  const sampleComments: Comment[] = [
     { id: '1', userId: 'user1', content: '정말 예쁜 코트네요!', timestamp: new Date().toISOString() },
     { id: '2', userId: 'user2', content: '가격이 좀 비싸네요', timestamp: new Date().toISOString() },
     { id: '3', userId: 'user3', content: '색상이 마음에 들어요', timestamp: new Date().toISOString() },
