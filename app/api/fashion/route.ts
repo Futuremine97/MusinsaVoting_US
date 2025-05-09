@@ -9,6 +9,13 @@ interface Comment {
   timestamp: string;
 }
 
+interface ShoppingLink {
+  title: string;
+  url: string;
+  price: string;
+  platform: string;
+}
+
 interface FashionItem {
   id: string;
   title: string;
@@ -21,10 +28,28 @@ interface FashionItem {
   comments: Comment[];
   userId: string;
   userName: string;
+  shoppingLinks?: ShoppingLink[];
 }
 
 // 임시 저장소 (실제로는 데이터베이스를 사용해야 합니다)
 let fashionItems: FashionItem[] = [];
+
+// 임시 쇼핑 링크 생성 함수 (실제로는 이미지 분석 API를 사용해야 합니다)
+function generateShoppingLinks(title: string): ShoppingLink[] {
+  const platforms = ['Musinsa', '29CM', 'W Concept', 'SSENSE'];
+  const links: ShoppingLink[] = [];
+  
+  platforms.forEach(platform => {
+    links.push({
+      title: `${title} on ${platform}`,
+      url: `https://${platform.toLowerCase().replace(' ', '')}.com/search?q=${encodeURIComponent(title)}`,
+      price: `${Math.floor(Math.random() * 200000) + 100000}원`,
+      platform
+    });
+  });
+  
+  return links;
+}
 
 function generateInitialItems(): FashionItem[] {
   const items = [];
@@ -58,9 +83,10 @@ function generateInitialItems(): FashionItem[] {
   for (let i = 1; i <= 5; i++) {
     const imageIndex = (i - 1) % fashionImages.length;
     const titleIndex = (i - 1) % coatTitles.length;
+    const title = coatTitles[titleIndex];
     items.push({
       id: `item-${i}`,
-      title: coatTitles[titleIndex],
+      title,
       imageUrls: [fashionImages[imageIndex], fashionImages[(imageIndex + 1) % fashionImages.length]],
       likes: Math.floor(Math.random() * 1000),
       isLiked: false,
@@ -69,7 +95,8 @@ function generateInitialItems(): FashionItem[] {
       price: `${Math.floor(Math.random() * 200000) + 100000}원`,
       comments: [...sampleComments],
       userId: `user${i}`,
-      userName: `User ${i}`
+      userName: `User ${i}`,
+      shoppingLinks: generateShoppingLinks(title)
     });
   }
   return items;
@@ -115,15 +142,29 @@ export async function POST(request: Request) {
       })
     );
 
-    // Here you would typically save the post data to your database
-    // For now, we'll just return the uploaded image URLs
-    return NextResponse.json({
-      success: true,
-      imageUrls,
+    // Generate shopping links
+    const shoppingLinks = generateShoppingLinks(title);
+
+    // Create new fashion item
+    const newItem: FashionItem = {
+      id: `item-${Date.now()}`,
       title,
+      imageUrls,
+      likes: 0,
+      isLiked: false,
       description,
+      timestamp: new Date().toISOString(),
       price,
-    });
+      comments: [],
+      userId: 'current-user',
+      userName: 'Current User',
+      shoppingLinks
+    };
+
+    // Add to items array
+    fashionItems.unshift(newItem);
+
+    return NextResponse.json(newItem);
   } catch (error) {
     console.error('Error uploading images:', error);
     return NextResponse.json(

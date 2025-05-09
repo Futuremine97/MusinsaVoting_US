@@ -2,13 +2,20 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Heart, MessageCircle, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, MessageCircle, Share2, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 
 interface Comment {
   id: string;
   userId: string;
   content: string;
   timestamp: string;
+}
+
+interface ShoppingLink {
+  title: string;
+  url: string;
+  price: string;
+  platform: string;
 }
 
 interface FashionItemProps {
@@ -24,6 +31,7 @@ interface FashionItemProps {
     comments: Comment[];
     userId: string;
     userName: string;
+    shoppingLinks?: ShoppingLink[];
   };
   onLike: (id: string) => void;
 }
@@ -32,6 +40,7 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showShoppingLinks, setShowShoppingLinks] = useState(false);
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +128,13 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
             <MessageCircle className="w-6 h-6" />
             <span>{item.comments.length}</span>
           </button>
+          <button
+            onClick={() => setShowShoppingLinks(!showShoppingLinks)}
+            className="flex items-center space-x-1 text-gray-500"
+          >
+            <ShoppingBag className="w-6 h-6" />
+            <span>Shop</span>
+          </button>
           <button className="text-gray-500">
             <Share2 className="w-6 h-6" />
           </button>
@@ -132,6 +148,32 @@ export default function FashionItem({ item, onLike }: FashionItemProps) {
           )}
           <p className="text-gray-700">{item.description}</p>
         </div>
+
+        {/* Shopping Links */}
+        {showShoppingLinks && item.shoppingLinks && (
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-semibold mb-2">Shopping Links</h4>
+            <div className="space-y-2">
+              {item.shoppingLinks.map((link, index) => (
+                <a
+                  key={index}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-2 bg-white rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">{link.platform}</p>
+                      <p className="text-sm text-gray-600">{link.title}</p>
+                    </div>
+                    <p className="font-semibold text-blue-600">{link.price}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Comments Section */}
         {showComments && (
