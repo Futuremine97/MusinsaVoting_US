@@ -36,15 +36,47 @@ let fashionItems: FashionItem[] = [];
 
 // 임시 쇼핑 링크 생성 함수 (실제로는 이미지 분석 API를 사용해야 합니다)
 function generateShoppingLinks(title: string): ShoppingLink[] {
-  const platforms = ['Musinsa', '29CM', 'W Concept', 'SSENSE'];
+  const platforms = [
+    {
+      name: 'Musinsa',
+      url: 'https://www.musinsa.com/search/musinsa/goods?q=',
+      domain: 'musinsa.com'
+    },
+    {
+      name: '29CM',
+      url: 'https://www.29cm.co.kr/search?keyword=',
+      domain: '29cm.co.kr'
+    },
+    {
+      name: 'W Concept',
+      url: 'https://www.wconcept.co.kr/Search?keyword=',
+      domain: 'wconcept.co.kr'
+    },
+    {
+      name: 'SSENSE',
+      url: 'https://www.ssense.com/en-us/search?q=',
+      domain: 'ssense.com'
+    },
+    {
+      name: 'ZARA',
+      url: 'https://www.zara.com/kr/ko/search?searchTerm=',
+      domain: 'zara.com'
+    },
+    {
+      name: 'H&M',
+      url: 'https://www2.hm.com/ko_kr/search-results.html?q=',
+      domain: 'hm.com'
+    }
+  ];
+  
   const links: ShoppingLink[] = [];
   
   platforms.forEach(platform => {
     links.push({
-      title: `${title} on ${platform}`,
-      url: `https://${platform.toLowerCase().replace(' ', '')}.com/search?q=${encodeURIComponent(title)}`,
+      title: `${title} on ${platform.name}`,
+      url: `${platform.url}${encodeURIComponent(title)}`,
       price: `${Math.floor(Math.random() * 200000) + 100000}원`,
-      platform
+      platform: platform.name
     });
   });
   

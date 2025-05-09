@@ -1,0 +1,6 @@
+# Ignore everything
+*
+
+# Allow only app1 directory
+!app1/
+!app1/** 
