@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Comment {
   id: string;
@@ -93,46 +95,39 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const userId = formData.get('userId') as string;
-    const userName = formData.get('userName') as string;
-    const imageCount = parseInt(formData.get('imageCount') as string);
+    const price = formData.get('price') as string;
+    const files = formData.getAll('images') as File[];
 
-    if (!title || !description || !userId || !userName || !imageCount) {
+    if (!title || !description || files.length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Title, description, and at least one image are required' },
         { status: 400 }
       );
     }
 
-    const imageUrls: string[] = [];
-    for (let i = 0; i < imageCount; i++) {
-      const imageFile = formData.get(`image${i}`) as File;
-      if (imageFile) {
-        const imageBuffer = await imageFile.arrayBuffer();
-        const base64Image = Buffer.from(imageBuffer).toString('base64');
-        imageUrls.push(`data:${imageFile.type};base64,${base64Image}`);
-      }
-    }
+    // Upload images to Vercel Blob Storage
+    const imageUrls = await Promise.all(
+      files.map(async (file) => {
+        const blob = await put(`fashion/${uuidv4()}-${file.name}`, file, {
+          access: 'public',
+        });
+        return blob.url;
+      })
+    );
 
-    const newItem: FashionItem = {
-      id: `item-${Date.now()}`,
-      title,
+    // Here you would typically save the post data to your database
+    // For now, we'll just return the uploaded image URLs
+    return NextResponse.json({
+      success: true,
       imageUrls,
-      likes: 0,
-      isLiked: false,
+      title,
       description,
-      timestamp: new Date().toISOString(),
-      comments: [],
-      userId,
-      userName
-    };
-
-    fashionItems.unshift(newItem);
-    return NextResponse.json(newItem);
+      price,
+    });
   } catch (error) {
-    console.error('Error in fashion API:', error);
+    console.error('Error uploading images:', error);
     return NextResponse.json(
-      { error: 'Failed to create fashion item' },
+      { error: 'Error uploading images' },
       { status: 500 }
     );
   }
