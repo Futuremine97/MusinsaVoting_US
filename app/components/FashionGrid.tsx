@@ -14,7 +14,7 @@ interface Comment {
 interface FashionItem {
   id: string;
   title: string;
-  imageUrl: string;
+  imageUrls: string[];
   likes: number;
   isLiked: boolean;
   description: string;
@@ -23,6 +23,12 @@ interface FashionItem {
   comments: Comment[];
   userId: string;
   userName: string;
+  shoppingLinks?: {
+    title: string;
+    url: string;
+    price: string;
+    platform: string;
+  }[];
 }
 
 export default function FashionGrid() {
@@ -32,6 +38,9 @@ export default function FashionGrid() {
   const fetchItems = async () => {
     try {
       const response = await fetch('/api/fashion');
+      if (!response.ok) {
+        throw new Error('Failed to fetch items');
+      }
       const data = await response.json();
       setItems(data);
     } catch (error) {
@@ -59,25 +68,6 @@ export default function FashionGrid() {
     );
   };
 
-  const handleUpload = async (formData: FormData) => {
-    try {
-      const response = await fetch('/api/fashion', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const newItem = await response.json();
-      setItems(prevItems => [newItem, ...prevItems]);
-    } catch (error) {
-      console.error('Error uploading:', error);
-      throw error;
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -88,7 +78,7 @@ export default function FashionGrid() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <UploadForm onUpload={handleUpload} />
+      <UploadForm />
       <div className="space-y-8">
         {items.map(item => (
           <FashionItem
