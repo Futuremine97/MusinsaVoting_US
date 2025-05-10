@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { v4 as uuidv4 } from 'uuid';
+import connectDB from '@/lib/mongodb';
+import FashionItem from '@/models/FashionItem';
 
 interface Comment {
   id: string;
@@ -150,58 +152,39 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  try {
+    await connectDB();
     const formData = await request.formData();
-    const title = formData.get('title') as string;
+    const userId = formData.get('userId') as string;
+    const userName = formData.get('userName') as string;
     const description = formData.get('description') as string;
-    const price = formData.get('price') as string;
     const files = formData.getAll('images') as File[];
 
-    if (!title || !description || files.length === 0) {
-      return NextResponse.json(
-        { error: 'Title, description, and at least one image are required' },
-        { status: 400 }
-      );
+    if (!userId || !userName || !description || files.length === 0) {
+      return NextResponse.json({ error: '필수 항목 누락' }, { status: 400 });
     }
 
-    // Upload images to Vercel Blob Storage
+    if (!userId || !userName || !description || files.length === 0) {
+      return NextResponse.json({ error: '필수 항목 누락' }, { status: 400 });
+    }
+
     const imageUrls = await Promise.all(
       files.map(async (file) => {
-        const blob = await put(`fashion/${uuidv4()}-${file.name}`, file, {
-          access: 'public',
-        });
+        const blob = await put(`fashion/${uuidv4()}-${file.name}`, file, { access: 'public' });
         return blob.url;
       })
     );
 
-    // Generate shopping links
-    const shoppingLinks = generateShoppingLinks(title);
+    const shoppingLinks = generateLinks(description);
 
-    // Create new fashion item
-    const newItem: FashionItem = {
-      id: `item-${Date.now()}`,
-      title,
+    const newItem = new FashionItem({
+      userId,
+      userName,
       imageUrls,
-      likes: 0,
-      isLiked: false,
       description,
-      timestamp: new Date().toISOString(),
-      price,
       comments: [],
-      userId: 'current-user',
-      userName: 'Current User',
-      shoppingLinks
-    };
+      shoppingLinks,
+    });
 
-    // Add to items array
-    fashionItems.unshift(newItem);
-
+    await newItem.save();
     return NextResponse.json(newItem);
-  } catch (error) {
-    console.error('Error uploading images:', error);
-    return NextResponse.json(
-      { error: 'Error uploading images' },
-      { status: 500 }
-    );
   }
-} 
