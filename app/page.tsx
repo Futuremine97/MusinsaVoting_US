@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import FashionGrid from './components/FashionGrid';
-import MusinsaTicker from "@/components/MusinsaTicker";
+import MusinsaTicker from "./components/MusinsaTicker";
 
 
 export default function Home() {
