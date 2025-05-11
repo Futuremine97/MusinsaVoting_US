@@ -25,8 +25,9 @@ export default function MusinsaTicker() {
     let left = 0;
 
     function animate() {
+      if (!ticker) return; // ticker가 null이면 함수 종료
       left -= 1;
-      if (ticker.scrollWidth + left < ticker.parentElement!.offsetWidth) {
+      if (ticker.scrollWidth + left < (ticker.parentElement?.offsetWidth || 0)) {
         left = 0;
       }
       ticker.style.transform = `translateX(${left}px)`;
