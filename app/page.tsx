@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import FashionGrid from './components/FashionGrid';
 import MusinsaTicker from "./components/MusinsaTicker";
+import MusinsaImages from "./components/MusinsaImages";
 
 
 export default function Home() {
@@ -11,6 +12,8 @@ export default function Home() {
       <Suspense fallback={<div>Loading...</div>}>
         <FashionGrid />
       </Suspense>
+      <h2>무신사 인기 상품</h2>
+      <MusinsaImages keyword="반팔티" />
     </main>
   );
 } 
