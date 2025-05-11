@@ -13,7 +13,7 @@ export default function Home() {
         <FashionGrid />
       </Suspense>
       <h2>무신사 인기 상품</h2>
-      <MusinsaImages keyword="반팔티" />
+      <MusinsaImages keyword="남자 코트" />
     </main>
   );
 } 
