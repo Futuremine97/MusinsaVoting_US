@@ -11,6 +11,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "@vercel/blob": "^1.0.1",
+    "chart.js": "^4.4.9",
     "cheerio": "^1.0.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.507.0",
@@ -20,8 +21,10 @@
     "node-fetch": "^3.3.2",
     "pupeteer": "^0.0.1",
     "react": "^18",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "yahoo-finance2": "^2.13.3"
   },
   "devDependencies": {
     "@types/node": "^20",

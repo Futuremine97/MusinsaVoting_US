@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import FashionGrid from './components/FashionGrid';
 import MusinsaTicker from "./components/MusinsaTicker";
 import MusinsaImages from "./components/MusinsaImages";
+import NasdaqScatterChart from "./components/NasdaqScatterChart";
 
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
       </Suspense>
       <h2>무신사 인기 상품</h2>
       <MusinsaImages keyword="남자 코트" />
+      <NasdaqScatterChart />
     </main>
   );
 } 
