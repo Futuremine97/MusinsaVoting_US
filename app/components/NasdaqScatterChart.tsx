@@ -17,7 +17,7 @@ export default function NasdaqScatterChart() {
 
   return (
     <div style={{ width: "100%", maxWidth: 900, margin: "40px auto" }}>
-      <h3>나스닥 100 평균-분산 산점도</h3>
+      <h3>나스닥 100 평균-분산 산점도 (정규화)</h3>
       <Scatter
         data={{
           datasets: [{
@@ -35,8 +35,8 @@ export default function NasdaqScatterChart() {
             }
           },
           scales: {
-            x: { title: { display: true, text: "평균값" } },
-            y: { title: { display: true, text: "분산" } }
+            x: { title: { display: true, text: "평균값 (정규화)" } },
+            y: { title: { display: true, text: "분산 (정규화)" } }
           }
         }}
       />
